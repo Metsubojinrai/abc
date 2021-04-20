@@ -1,0 +1,54 @@
+﻿@model UserViewModel
+@{
+    ViewData["Title"] = "DANH SÁCH NGƯỜI DÙNG";
+}
+
+<h4>@ViewData["Title"]</h4>
+<a asp-action="CreateUser" asp-controller="Admin" class="btn btn-secondary">Tạo User mới</a>
+<table class="table table-striped">
+    <tr>
+        <th>UserName</th>
+        <th>Roles</th>
+        <th>Actions</th>
+    </tr>
+    @foreach (var user in @Model.users)
+    {
+        <tr>
+            <td>@user.UserName</td>
+            <td>@user.ListRoles</td>
+            <td>
+                <form method="POST" class="d-inline">
+                    <a class="btn btn-primary btn-sm" asp-controller="Role" asp-action="AssignUserRole"
+                        asp-route-id="@user.Id">Cập nhật Role
+                    </a>
+                    <a class="btn btn-danger btn-sm" asp-controller="Admin" asp-action="DeleteUser" 
+                       asp-route-id="@user.Id">
+                        Xóa
+                    </a>
+                </form>
+            </td>
+        </tr>
+
+    }
+</table>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
+@{
+
+    Func<int?, string> generateUrl = (int? _pagenumber) =>
+    {
+        string url = Model.ReturnUrl + new { pageNumber = _pagenumber };
+        return url;
+    };
+
+    var datapaging = new
+    {
+        currentPage = Model.PageNumber,
+        countPages = Model.TotalPages,
+        generateUrl = generateUrl
+    };
+
+}
+<partial name="_Paging" model="@datapaging" />

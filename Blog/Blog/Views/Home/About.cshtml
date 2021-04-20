@@ -1,0 +1,13 @@
+﻿@{
+    ViewData["Title"] = "About";
+    Layout = "/Views/Shared/_TestLayout.cshtml";
+}
+<h1>@ViewData["Title"]</h1>
+
+<div>
+    <p>Trang web về series các siêu anh hùng mắt bọ Nhật bản (Kamen Rider)</p>
+</div>
+
+@section Topbar {
+    @await Html.PartialAsync("/Views/Shared/_TopBar.cshtml")
+}

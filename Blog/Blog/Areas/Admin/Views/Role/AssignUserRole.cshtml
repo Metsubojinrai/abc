@@ -1,0 +1,38 @@
+﻿@model AssignUserRoleViewModel
+
+@{
+    ViewData["Title"] = "Cập nhật role cho user";
+}
+
+<h4>@ViewData["Title"]</h4>
+<div class="row">
+    <div class="col-md-6">
+        <p>Chọn role gán cho <strong>@Model.Input.Name</strong></p>
+        <form method="post">
+            <div class="form-group">
+                @Html.LabelFor(x => x.Input.RoleNames)<hr />
+                @Html.ListBoxFor(x => x.Input.RoleNames, new SelectList(Model.AllRoles), new { @class = "w-10", id = "selectrole" })
+            </div>
+            <div asp-validation-summary="All" class="text-danger"></div>
+            <input type="hidden" asp-for="Input.ID" />
+            <input type="hidden" asp-for="IsConfirmed" />
+            <a class="btn btn-primary" asp-controller="Role" asp-action="ListUser">Danh sách</a>
+            <button type="submit" class="btn btn-danger">Cập nhật</button>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/lib/multiple-select/multiple-select.min.js"></script>
+    <link rel="stylesheet" href="~/lib/multiple-select/multiple-select.min.css" />
+    <script>
+          $('#selectrole').multipleSelect({
+                selectAll: false,
+                keepOpen: false,
+                isOpen: false
+            });
+    </script>
+
+
+    <partial name="_ValidationScriptsPartial" />
+}

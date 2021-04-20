@@ -1,0 +1,41 @@
+﻿@using Microsoft.AspNetCore.Identity
+@using Microsoft.AspNetCore.Mvc.ViewEngines
+
+@inject SignInManager<User> SignInManager
+@inject UserManager<User> UserManager
+@inject ICompositeViewEngine Engine
+
+<ul class="navbar-nav">
+    @if (SignInManager.IsSignedIn(User))
+    {
+        <li class="nav-item" style="align-self: center;">
+            @if (UserManager.GetUserAsync(User).Result.ProfilePicture != null)
+            {
+                <img style="width:40px;height:40px; object-fit:cover; border-radius:30px"
+                     src="~/File/Image/User/@UserManager.GetUserAsync(User).Result.ProfilePicture">
+            }
+        </li>
+        <li class="nav-item">
+            <a id="manage" class="nav-link text-dark" asp-area="Manage" asp-controller="Manage" asp-action="Index">Xin chào @UserManager.GetUserName(User)!</a>
+        </li>
+        <li class="nav-item">
+            <form id="logoutForm" class="form-inline" asp-area="Account" asp-controller="Account" asp-action="Logout">
+                <button id="logout" type="submit" class="nav-link btn btn-link text-dark">Đăng xuất</button>
+            </form>
+        </li>
+
+        @if (Engine.FindView(ViewContext, "_AdminDropdownMenu", false).Success)
+        {
+            @await Html.PartialAsync("_AdminDropdownMenu")
+        }
+    }
+    else
+    {
+        <li class="nav-item">
+            <a class="nav-link text-dark" id="register" asp-area="Manage" asp-controller="Account" asp-action="Register">Đăng ký</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link text-dark" id="login" asp-area="Account" asp-controller="Account" asp-action="Login">Đăng nhập</a>
+        </li>
+    }
+</ul>

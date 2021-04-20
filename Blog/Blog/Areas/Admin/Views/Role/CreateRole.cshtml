@@ -1,0 +1,18 @@
+﻿@model IEnumerable<Role>
+
+<h1 class="bg-info text-white">Tạo Role mới</h1>
+<a asp-action="Index" class="btn btn-secondary">Quay lại</a>
+<div asp-validation-summary="All" class="text-danger"></div>
+
+<form asp-action="CreateRole" method="post">
+    <div class="form-group">
+        <label for="Name">Tên Role:</label>
+        <input name="Name" class="form-control" />
+    </div>
+    <div class="form-group">
+        <label for="Description">Mô tả:</label>
+        <input name="Description" class="form-control" />
+    </div>
+
+    <button type="submit" class="btn btn-primary">Tạo</button>
+</form>

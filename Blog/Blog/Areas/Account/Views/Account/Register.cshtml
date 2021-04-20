@@ -1,0 +1,49 @@
+﻿@model RegisterViewModel
+@{
+    Layout = "/Areas/Account/Views/Account/_LoginLayout.cshtml";
+    ViewData["Title"] = "ĐĂNG KÝ TÀI KHOẢN";
+}
+
+<div class="p-5">
+    <div class="text-center">
+        <h1 class="h4 text-gray-900 mb-4">@ViewData["Title"]</h1>
+    </div>
+    <form asp-area="Account" asp-controller="Account" asp-action="Register" method="post">
+
+        <h4>Điền thông tin để tạo tài khoản mới.</h4>
+        <hr />
+        <div asp-validation-summary="All" class="text-danger"></div>
+        <div class="form-group">
+            <label asp-for="Input.UserName"></label>
+            <input asp-for="Input.UserName" class="form-control form-control-user" />
+            <span asp-validation-for="Input.UserName" class="text-danger"></span>
+        </div>
+        <div class="form-group">
+            <label asp-for="Input.Email"></label>
+            <input asp-for="Input.Email" class="form-control form-control-user" />
+            <span asp-validation-for="Input.Email" class="text-danger"></span>
+        </div>
+        <div class="form-group">
+            <label asp-for="Input.Password"></label>
+            <input asp-for="Input.Password" class="form-control form-control-user" />
+            <span asp-validation-for="Input.Password" class="text-danger"></span>
+        </div>
+        <div class="form-group">
+            <label asp-for="Input.ConfirmPassword"></label>
+            <input asp-for="Input.ConfirmPassword" class="form-control form-control-user" />
+            <span asp-validation-for="Input.ConfirmPassword" class="text-danger"></span>
+        </div>
+
+        <div class="text-center">
+            <button type="submit" class="btn btn-primary">Đăng ký</button>
+        </div>
+        <div class="text-center">
+            <a class="small" asp-area="Account" asp-controller="Account" asp-action="Login">Đã có tài khoản, hãy đăng nhập</a>
+        </div>
+
+    </form>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

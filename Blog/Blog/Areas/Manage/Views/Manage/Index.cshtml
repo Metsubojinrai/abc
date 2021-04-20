@@ -1,0 +1,76 @@
+﻿@using Microsoft.AspNetCore.Identity
+@model UserProfileViewModel
+@inject UserManager<User> UserManager
+@{
+    ViewData["Title"] = "Hồ sơ";
+    ViewData["ActivePage"] = ManageNavPages.Index;
+}
+
+<h4>@ViewData["Title"]</h4>
+<hr />
+<partial name="_StatusMessage" model="Model.StatusMessage" />
+<form asp-action="Index" enctype="multipart/form-data">
+    <div class="row">
+        <div class="col-md-6">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="UserName" class="control-label"></label>
+                <input asp-for="UserName" class="form-control" disabled />
+                <span asp-validation-for="UserName" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="Input.PhoneNumber" class="control-label"></label>
+                <input asp-for="Input.PhoneNumber" class="form-control" />
+                <span asp-validation-for="Input.PhoneNumber" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="Input.FullName" class="control-label"></label>
+                <input asp-for="Input.FullName" class="form-control" />
+                <span asp-validation-for="Input.FullName" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="Input.Address" class="control-label"></label>
+                <input asp-for="Input.Address" class="form-control" />
+                <span asp-validation-for="Input.Address" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="Input.Birthday" class="control-label"></label>
+                <input asp-for="Input.Birthday" />
+                <span asp-validation-for="Input.Birthday" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <input type="submit" value="Lưu" class="btn btn-primary" />
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="Input.ProfilePicture" style="width:100%;"></label>
+                @if (Model.Input.ProfilePicture != null)
+                {
+                    <img id="profilePicture" style="width:350px;height:350px;object-fit:cover"
+                         src="~/File/Image/User/@UserManager.GetUserAsync(User).Result.ProfilePicture" />
+                }
+                else
+                {
+                    <img img id="profilePicture" style="width:350px;height:350px;object-fit:cover" src="" />
+                }
+                <input type="file" accept=".png,.jpg,.jpeg,.gif,.tif"
+                       asp-for="Input.ProfilePicture"
+                       class="form-control"
+                       style="border: 0px !important; padding: 0px; padding-top: 10px; padding-bottom: 30px;"
+                       onchange="document.getElementById('profilePicture').src = window.URL.createObjectURL(this.files[0])" />
+                <span asp-validation-for="Input.ProfilePicture" class="text-danger"></span>
+            </div>
+        </div>
+    </div>
+</form>
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

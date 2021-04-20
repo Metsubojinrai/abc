@@ -1,0 +1,99 @@
+﻿@model IEnumerable<Blog.Models.Product>
+
+@{
+    ViewData["Title"] = "Index";
+    Layout = "_Layout";
+}
+
+<h1>Danh sách sản phẩm</h1>
+
+<p>
+    <a asp-action="Create">Tạo sản phẩm mới</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.Name)
+            </th>
+            <th>
+                Loại sản phẩm
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Description)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Price)
+            </th>
+            <th>
+                Ngày tạo <br />
+                Cập nhật
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.ProductPicture)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Name)
+                </td>
+                <td>
+                    @Html.Raw(string.Join("<br>",
+                        item.ProductCategories
+                        .Select(p => p.Category)
+                        .ToList()
+                        .Select(c => $"<i>{c.Name}</i>")))
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Description)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Price)
+                </td>
+                <td>
+                    @item.DateCreated.ToShortDateString()
+                    <br>
+                    @item.DateUpdated.ToShortDateString()
+                </td>
+                <td>
+                    @if (item.ProductPicture != null)
+                    {
+                        <img id="ProductPicture" style="width:150px;height:100px;object-fit:scale-down"
+                             src="~/File/Image/Product/@item.ProductPicture" />
+                    }
+                    else
+                    {
+                        <img id="ProductPicture" style="width:150px;height:100px;object-fit:scale-down"
+                             src="" />
+                    }
+                </td>
+                <td>
+                    <a asp-action="Edit" asp-route-id="@item.ProductId">Sửa</a> |
+                    <a asp-action="Details" asp-route-id="@item.ProductId">Chi tiết</a> |
+                    <a asp-action="Delete" asp-route-id="@item.ProductId">Xóa</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+@{
+
+    Func<int?, string> generateUrl = (int? _pagenumber) =>
+    {
+        return Url.ActionLink("Index", null, new { page = _pagenumber });
+    };
+
+    var datapaging = new
+    {
+        currentPage = ViewBag.pageNumber,
+        countPages = ViewBag.totalPages,
+        generateUrl = generateUrl
+    };
+
+}
+<partial name="_Paging" model="@datapaging" />

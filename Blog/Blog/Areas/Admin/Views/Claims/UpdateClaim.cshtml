@@ -1,0 +1,36 @@
+﻿@model ClaimsViewModel
+
+@{
+    ViewData["Title"] = "Cập nhật";
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<h4>Biên tập Claim</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="claim.ClaimType" class="control-label"></label>
+                <input asp-for="claim.ClaimType" class="form-control" />
+                <span asp-validation-for="claim.ClaimType" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="claim.ClaimValue" class="control-label"></label>
+                <input asp-for="claim.ClaimValue" class="form-control" />
+                <span asp-validation-for="claim.ClaimValue" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Cập nhật" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+<a asp-action="Index" asp-controller="Claims" asp-route-id="@Model.claim.RoleId">Quay lại</a>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
+

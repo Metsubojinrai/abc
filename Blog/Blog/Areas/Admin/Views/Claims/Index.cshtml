@@ -1,0 +1,45 @@
+﻿@model ClaimsViewModel
+
+@{
+    ViewData["Title"] = "Claim cho:" + Model.role.Name;
+}
+
+<h1>Role: @Model.role.Name</h1>
+<p>
+    <a asp-controller="Claims" asp-action="CreateClaim" asp-route-id="@Model.role.Id">Thêm Claim</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>
+                @Html.DisplayNameFor(model => model.claims[0].ClaimType)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.claims[0].ClaimValue)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.claims)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Id)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.ClaimType)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.ClaimValue)
+                </td>
+                <td>
+                    <a asp-action="UpdateClaim" asp-controller="Claims" asp-route-id="@Model.role.Id" asp-route-claimid="@item.Id">Sửa</a> |
+                    <a asp-action="DeleteClaim" asp-controller="Claims" asp-route-id="@Model.role.Id" asp-route-claimid="@item.Id">Xóa</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+<a asp-area="Admin" asp-controller="Role" asp-action="Index">Danh sách Role</a>

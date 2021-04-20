@@ -1,0 +1,23 @@
+﻿@model List<Blog.Models.Product>
+@{
+    ViewData["Title"] = "Các sản phẩm";
+    Layout = "/Views/Shared/_Layout.cshtml";
+}
+
+<div class="card-columns">
+    @foreach(var product in Model)
+    {
+        <div class="card">
+            <h4 class="card-header">@product.Name</h4>
+            <div class="card-body" style="height: 150px;">
+                <img id="ProductPicture" style="width:150px;height:100px;object-fit:scale-down"
+                     src="~/File/Image/Product/@product.ProductPicture" />
+            </div>
+            <div class="card-footer">
+                <span class="text-muted">@product.Price.ToString("n0") VND</span>
+                <a asp-route="addcart" asp-route-productid ="@product.ProductId"
+                   class="btn btn-secondary btn-sm float-right">Đặt hàng</a> 
+            </div> 
+        </div>
+    }
+</div>
