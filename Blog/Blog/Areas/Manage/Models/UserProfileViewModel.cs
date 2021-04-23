@@ -20,7 +20,7 @@ namespace Blog.Areas.Manage.Models
         public class InputModel
         {
             [Phone]
-            [RegularExpression(@"(84|0[3|5|7|8|9])+([0-9]{8})\b", ErrorMessage = "Số điện thoại không đúng")]
+            [RegularExpression(@"^[+]*[(]{0,1}[0-9]{1,4}[)]{0,1}[-\s\./0-9]*$", ErrorMessage = "Số điện thoại không đúng")]
             [Display(Name = "Số điện thoại")]
             public string PhoneNumber { get; set; }
 

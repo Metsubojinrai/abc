@@ -1,5 +1,7 @@
 ﻿using Blog.Areas.Manage.Models;
 using Blog.Models;
+using Blog.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
@@ -7,7 +9,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Logging;
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -18,6 +19,7 @@ namespace Blog.Areas.Manage.Controllers
 {
     [Area("Manage")]
     [Route("[controller]/[action]")]
+    [Authorize]
     public class ManageController : Controller
     {
         private readonly UserManager<User> _userManager;
@@ -25,18 +27,21 @@ namespace Blog.Areas.Manage.Controllers
         private readonly ILogger<ManageController> _logger;
         private readonly IEmailSender _emailSender;
         private readonly UrlEncoder _urlEncoder;
+        private readonly ISMSSender _sMSSender;
 
         private const string AuthenticatorUriFormat = "otpauth://totp/{0}:{1}?secret={2}&issuer={0}&digits=6";
         private const string RecoveryCodesKey = nameof(RecoveryCodesKey);
+
         public ManageController(UserManager<User> userManager,
             SignInManager<User> signInManager, ILogger<ManageController> logger,
-            IEmailSender emailSender, UrlEncoder urlEncoder)
+            IEmailSender emailSender, UrlEncoder urlEncoder, ISMSSender sMSSender)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _logger = logger;
             _emailSender = emailSender;
             _urlEncoder = urlEncoder;
+            _sMSSender = sMSSender;
         }
 
         private void AddErrors(IdentityResult result)
@@ -85,17 +90,6 @@ namespace Blog.Areas.Manage.Controllers
             if (!ModelState.IsValid)
             {
                 return View(model);
-            }
-
-            var phoneNumber = await _userManager.GetPhoneNumberAsync(user);
-            if(model.Input.PhoneNumber!=phoneNumber)
-            {
-                var setPhoneResult = await _userManager.SetPhoneNumberAsync(user,model.Input.PhoneNumber);
-                if(!setPhoneResult.Succeeded)
-                {
-                    model.StatusMessage = "Lỗi cập nhật số điện thoại";
-                    return RedirectToAction("Index", "Manage");
-                }
             }
 
             if(model.Input.FullName!=user.FullName)
@@ -469,12 +463,12 @@ namespace Blog.Areas.Manage.Controllers
             var user = await _userManager.GetUserAsync(User);
             if (user == null)
             {
-                throw new ApplicationException($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
+                throw new ApplicationException($"Không thể tải người dùng có ID '{_userManager.GetUserId(User)}'.");
             }
 
             if (!user.TwoFactorEnabled)
             {
-                throw new ApplicationException($"Cannot generate recovery codes for user with ID '{user.Id}' because they do not have 2FA enabled.");
+                throw new ApplicationException($"Không thể tạo mã khôi phục cho người dùng có ID '{user.Id}' vì họ chưa bật 2FA.");
             }
 
             return View(nameof(GenerateRecoveryCodes));
@@ -487,16 +481,16 @@ namespace Blog.Areas.Manage.Controllers
             var user = await _userManager.GetUserAsync(User);
             if (user == null)
             {
-                throw new ApplicationException($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
+                throw new ApplicationException($"Không thể tải người dùng có ID '{_userManager.GetUserId(User)}'.");
             }
 
             if (!user.TwoFactorEnabled)
             {
-                throw new ApplicationException($"Cannot generate recovery codes for user with ID '{user.Id}' as they do not have 2FA enabled.");
+                throw new ApplicationException($"Không thể tạo mã khôi phục cho người dùng có ID '{user.Id}' vì họ chưa bật 2FA.");
             }
 
             var recoveryCodes = await _userManager.GenerateNewTwoFactorRecoveryCodesAsync(user, 10);
-            _logger.LogInformation("User with ID {UserId} has generated new 2FA recovery codes.", user.Id);
+            _logger.LogInformation("Người dùng có ID {UserId} đã tạo mã khôi phục 2FA mới.", user.Id);
 
             var model = new ShowRecoveryCodesViewModel { RecoveryCodes = recoveryCodes.ToArray() };
 
@@ -514,7 +508,7 @@ namespace Blog.Areas.Manage.Controllers
             }
             if (currentPosition < unformattedKey.Length)
             {
-                result.Append(unformattedKey.Substring(currentPosition));
+                result.Append(unformattedKey[currentPosition..]);
             }
 
             return result.ToString().ToLowerInvariant();
@@ -542,5 +536,102 @@ namespace Blog.Areas.Manage.Controllers
             model.AuthenticatorUri = GenerateQrCodeUri(user.Email, unformattedKey);
         }
 
+        public IActionResult AddPhoneNumber()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> AddPhoneNumber(PhoneViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+            // Tạo mã thông báo và gửi nó
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                return View("Error");
+            }
+            var code = await _userManager.GenerateChangePhoneNumberTokenAsync(user, model.PhoneNumber);
+            await _sMSSender.SendSms(model.PhoneNumber, "Mã bảo mật của bạn là: " + code);
+            return RedirectToAction(nameof(VerifyPhone), new { model.PhoneNumber });
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> VerifyPhone(string phoneNumber)
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                return View("Error");
+            }
+
+            return phoneNumber == null ? View("Error") : View(new PhoneViewModel { PhoneNumber = phoneNumber });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> VerifyPhone(PhoneViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+            var user = await _userManager.GetUserAsync(User);
+            if (user != null)
+            {
+                var result = await _userManager.ChangePhoneNumberAsync(user, model.PhoneNumber, model.Input.VerificationCode);
+                if (result.Succeeded)
+                {
+                    await _signInManager.SignInAsync(user, isPersistent: false);
+                    return RedirectToAction(nameof(ConfirmPhoneSuccess));
+                }
+            }
+
+            ModelState.AddModelError(string.Empty, "Không xác minh được số điện thoại");
+            return View(model);
+        }
+
+        public IActionResult ConfirmPhoneSuccess()
+        {
+            return View();
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> RemovePhoneNumber()
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                return View("Error");
+            }
+
+            var code = await _userManager.GenerateChangePhoneNumberTokenAsync(user, user.PhoneNumber);
+            await _sMSSender.SendSms(user.PhoneNumber, "Mã bảo mật của bạn là: " + code);
+            return View();
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> RemovePhoneNumber(PhoneViewModel model)
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user != null)
+            {
+                var result = await _userManager.ChangePhoneNumberAsync(user, user.PhoneNumber, model.Input.VerificationCode);
+                if (result.Succeeded)
+                {
+                    var update = await _userManager.SetPhoneNumberAsync(user,null);
+                    if (update.Succeeded)
+                    {
+                        await _signInManager.SignInAsync(user, isPersistent: false);
+                        return RedirectToAction(nameof(Index));
+                    }
+                }
+            }
+            return RedirectToAction(nameof(Index));
+        }
     }
 }

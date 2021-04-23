@@ -21,8 +21,17 @@
 
             <div class="form-group">
                 <label asp-for="Input.PhoneNumber" class="control-label"></label>
-                <input asp-for="Input.PhoneNumber" class="form-control" />
+                <input asp-for="Input.PhoneNumber" class="form-control" disabled />
                 <span asp-validation-for="Input.PhoneNumber" class="text-danger"></span>
+                @if (Model.Input.PhoneNumber != null)
+                {
+                    <a asp-controller="Manage" asp-action="AddPhoneNumber" class="btn-bracketed">Thay đổi</a>
+                    <a asp-controller="Manage" asp-action="RemovePhoneNumber" class="btn-bracketed">Gỡ bỏ</a>
+                }
+                else
+                {
+                    <a asp-controller="Manage" asp-action="AddPhoneNumber" class="btn-bracketed">Thêm</a>
+                }
             </div>
 
             <div class="form-group">

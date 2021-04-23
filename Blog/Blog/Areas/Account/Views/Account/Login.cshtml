@@ -31,16 +31,46 @@
         </div>
 
         <button type="submit" class="btn btn-primary btn-user btn-block">Đăng nhập</button>
+        <hr />
     </form>
-    <div class="text-center">
-        <a class="small" id="forgot-password" asp-area="Account" asp-controller="Account" 
-           asp-action="ForgotPassword">Bạn quên mật khẩu?</a>
+
+    @if ((Model.ExternalLogins?.Count ?? 0) != 0)
+    {
+        <form id="external-account" asp-action="ExternalLogin"
+              asp-route-returnUrl="@Model.ReturnUrl" method="post">
+            @foreach (var provider in Model.ExternalLogins)
+            {
+                string classiconprovider = "";
+                string classprovider = "";
+                if (provider.DisplayName == "Google")
+                {
+                    classprovider = "btn-google";
+                    classiconprovider = "fab fa-google fa-fw";
+                }
+                else if (provider.DisplayName == "Facebook")
+                {
+                    classprovider = "btn-facebook";
+                    classiconprovider = "fab fa-facebook-f fa-fw";
+                }
+
+                <button type="submit" class="btn @classprovider btn-user btn-block"
+                        name="provider" value="@provider.Name"
+                        title="Log in using your @provider.DisplayName account">
+                    <i class="@classiconprovider"></i>
+                    Đăng nhập bằng @provider.DisplayName
+                </button>
+            }
+        </form>
+    }
+        <div class="text-center">
+            <a class="small" id="forgot-password" asp-area="Account" asp-controller="Account"
+               asp-action="ForgotPassword">Bạn quên mật khẩu?</a>
+        </div>
+        <div class="text-center">
+            <a class="small" asp-area="Account" asp-controller="Account"
+               asp-action="Register">Chưa có tài khoản, đăng ký mới</a>
+        </div>
     </div>
-    <div class="text-center">
-        <a class="small" asp-area="Account" asp-controller="Account" 
-           asp-action="Register">Chưa có tài khoản, đăng ký mới</a>
-    </div>
-</div>
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
 }

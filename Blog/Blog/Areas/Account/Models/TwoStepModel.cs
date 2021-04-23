@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Mvc.Rendering;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -8,13 +9,12 @@ namespace Blog.Areas.Account.Models
 {
     public class TwoStepModel
     {
-        [Required]
-        [DataType(DataType.Text)]
-        [Display(Name = "Authenticator code")]
-        public string TwoFactorCode { get; set; }
+        public string SelectedProvider { get; set; }
 
-        [Display(Name = "Remember this machine")]
-        public bool RememberMachine { get; set; }
+        public ICollection<SelectListItem> Providers { get; set; }
+
+        public string ReturnUrl { get; set; }
+
         public bool RememberMe { get; set; }
     }
 }

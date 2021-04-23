@@ -1,6 +1,6 @@
 ﻿using Blog.Data;
-using Blog.Mail;
 using Blog.Models;
+using Blog.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -18,6 +18,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using Twilio;
 
 namespace Blog
 {
@@ -74,8 +75,10 @@ namespace Blog
             services.AddOptions();                                        // Kích hoạt Options
             var mailsettings = Configuration.GetSection("MailSettings");  // đọc config
             services.Configure<MailSettings>(mailsettings);               // đăng ký để Inject
+            services.AddTransient<IEmailSender, SendMailService>();       // Đăng ký dịch vụ Mail
 
-            services.AddTransient<IEmailSender, SendMailService>();        // Đăng ký dịch vụ Mail
+            services.AddTransient<ISMSSender, AuthMessageSender>();
+            services.Configure<SMSoptions>(Configuration.GetSection("SMS"));
 
             services.Configure<RouteOptions>(options =>
             {
@@ -100,18 +103,27 @@ namespace Blog
                 options.AddPolicy("CanDeleteUser", policy => policy.RequireClaim("permission", "user.delete"));
             });
 
-            services.Configure<SecurityStampValidatorOptions>(options =>
-            {
-                // Trên 30 giây truy cập lại sẽ nạp lại thông tin User (Role)
-                // SecurityStamp trong bảng User đổi -> nạp lại thông tinn Security
-                options.ValidationInterval = TimeSpan.FromSeconds(30);
-            });
-
             services.AddDistributedMemoryCache();           // Đăng ký dịch vụ lưu cache trong bộ nhớ (Session sẽ sử dụng nó)
             services.AddSession(cfg => {                    // Đăng ký dịch vụ Session
                 cfg.Cookie.Name = "blogmvc";             // Đặt tên Session - tên này sử dụng ở Browser (Cookie)
                 cfg.IdleTimeout = new TimeSpan(0, 30, 0);    // Thời gian tồn tại của Session
             });
+
+            services.AddAuthentication()
+                .AddFacebook(facebookOptions =>
+                {
+                    facebookOptions.AppId = "placeholder";
+                    facebookOptions.AppSecret = "placeholder";
+                })
+                .AddGoogle(googleOptions =>
+                {
+                    // Đọc thông tin Authentication:Google từ appsettings.json
+                    IConfigurationSection googleAuthNSection = Configuration.GetSection("Authentication:Google");
+
+                    // Thiết lập ClientID và ClientSecret để truy cập API google
+                    googleOptions.ClientId = googleAuthNSection["ClientId"];
+                    googleOptions.ClientSecret = googleAuthNSection["ClientSecret"];
+                });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

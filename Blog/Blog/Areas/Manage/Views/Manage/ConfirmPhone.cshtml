@@ -1,0 +1,28 @@
+﻿@model PhoneViewModel
+@{
+    ViewData["Title"] = "Confirm Phone number";
+}
+
+<h4>@ViewData["Title"]</h4>
+<div class="row">
+    <div class="col-md-6">
+        <form method="post">
+            <p>
+                Chúng tôi đã gửi mã xác nhận đến @Model.PhoneNumber
+                Nhập mã bạn nhận được để xác nhận số điện thoại của bạn.
+            </p>
+            <div asp-validation-summary="All" class="text-danger"></div>
+
+            <div class="form-group">
+                <label asp-for="Input.VerificationCode"></label>
+                <input asp-for="Input.VerificationCode" class="form-control" type="number" />
+                <span asp-validation-for="Input.VerificationCode" class="text-danger"></span>
+            </div>
+            <button type="submit" class="btn btn-primary">Xác nhận</button>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

@@ -22,7 +22,7 @@ namespace Blog.Controllers
             _dbcontext = dbContext;
         }
 
-        public async Task<IActionResult> Index(string searchString)
+        public IActionResult Index()
         {
             return View();
         }
