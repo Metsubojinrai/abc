@@ -1466,7 +1466,6 @@ D:\MetsubouJinrai\Blog\Blog\obj\Debug\net5.0\Blog.TagHelpers.output.cache
 D:\MetsubouJinrai\Blog\Blog\obj\Debug\net5.0\Blog.RazorCoreGenerate.cache
 D:\MetsubouJinrai\Blog\Blog\obj\Debug\net5.0\Razor\Areas\Account\Views\Account\AccessDenied.cshtml.g.cs
 D:\MetsubouJinrai\Blog\Blog\obj\Debug\net5.0\Razor\Areas\Account\Views\Account\ConfirmEmail.cshtml.g.cs
-D:\MetsubouJinrai\Blog\Blog\obj\Debug\net5.0\Razor\Areas\Account\Views\Account\ConfirmEmailChange.cshtml.g.cs
 D:\MetsubouJinrai\Blog\Blog\obj\Debug\net5.0\Razor\Areas\Account\Views\Account\ForgotPassword.cshtml.g.cs
 D:\MetsubouJinrai\Blog\Blog\obj\Debug\net5.0\Razor\Areas\Account\Views\Account\ForgotPasswordConfirmation.cshtml.g.cs
 D:\MetsubouJinrai\Blog\Blog\obj\Debug\net5.0\Razor\Areas\Account\Views\Account\Lockout.cshtml.g.cs
@@ -1561,3 +1560,5 @@ D:\MetsubouJinrai\Blog\Blog\bin\Debug\net5.0\Microsoft.AspNetCore.Authentication
 D:\MetsubouJinrai\Blog\Blog\bin\Debug\net5.0\Microsoft.AspNetCore.Authentication.Google.dll
 D:\MetsubouJinrai\Blog\Blog\bin\Debug\net5.0\Microsoft.AspNetCore.Authentication.MicrosoftAccount.dll
 D:\MetsubouJinrai\Blog\Blog\obj\Debug\net5.0\Razor\Areas\Account\Views\Account\ExternalLoginConfirmation.cshtml.g.cs
+D:\MetsubouJinrai\Blog\Blog\obj\Debug\net5.0\Razor\Areas\Manage\Views\Manage\ExternalLogin.cshtml.g.cs
+D:\MetsubouJinrai\Blog\Blog\obj\Debug\net5.0\Razor\Views\ViewProduct\CheckoutComplete.cshtml.g.cs

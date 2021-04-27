@@ -43,6 +43,7 @@ namespace Blog.Areas.Account.Controllers
         [TempData]
         public string ErrorMessage { get; set; }
 
+        #region Register
         [HttpGet]
         [AllowAnonymous]
         public IActionResult Register(string returnUrl = null)
@@ -174,7 +175,9 @@ namespace Blog.Areas.Account.Controllers
             }
             return View(model);
         }
+        #endregion
 
+        #region Forgot Password
         [HttpGet]
         [AllowAnonymous]
         public IActionResult ForgotPassword(string returnUrl = "")
@@ -284,7 +287,9 @@ namespace Blog.Areas.Account.Controllers
             ViewData["ReturnUrl"] = returnUrl;
             return View();
         }
+        #endregion
 
+        #region Log out
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Logout()
@@ -293,7 +298,9 @@ namespace Blog.Areas.Account.Controllers
             _logger.LogInformation("Đăng xuất thành công");
             return RedirectToAction("Index", "Home");
         }
+        #endregion
 
+        #region Log in
         [HttpGet]
         [AllowAnonymous]
         public async Task<IActionResult> Login(string returnUrl = "")
@@ -366,9 +373,11 @@ namespace Blog.Areas.Account.Controllers
 
             return View(model);
         }
+        #endregion
 
         // Post yêu cầu login bằng dịch vụ ngoài
         // Provider = Google, Facebook ... 
+        #region External Login
         [HttpPost]
         [AllowAnonymous]
         [ValidateAntiForgeryToken]
@@ -563,7 +572,9 @@ namespace Blog.Areas.Account.Controllers
             model.ReturnUrl = returnUrl;
             return View(model);
         }
+        #endregion
 
+        #region Login 2FA
         [HttpGet]
         [AllowAnonymous]
         public async Task<IActionResult> LoginTwoStep(bool rememberMe, string returnUrl = "")
@@ -709,36 +720,7 @@ namespace Blog.Areas.Account.Controllers
                 return View();
             }
         }
-
-        [HttpGet]
-        [AllowAnonymous]
-        public async Task<IActionResult> ConfirmEmailChange(string userId, string email, string code)
-        {
-            if (userId == null || email == null || code == null)
-            {
-                return RedirectToAction("Index","Home");
-            }
-
-            var user = await _userManager.FindByIdAsync(userId);
-            if (user == null)
-            {
-                return NotFound($"Unable to load user with ID '{userId}'.");
-            }
-
-            code = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(code));
-            var result = await _userManager.ChangeEmailAsync(user, email, code);
-            var model = new ConfirmEmailChangeViewModel();
-            if (!result.Succeeded)
-            {
-                model.StatusMessage = "Error changing email.";
-                return View(model);
-            }
-
-            await _signManager.RefreshSignInAsync(user);
-            model.StatusMessage = "Thank you for confirming your email change.";
-            return View(model);
-
-        }
+        #endregion
 
         [AllowAnonymous]
         public IActionResult Lockout()

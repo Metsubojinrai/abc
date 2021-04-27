@@ -1,6 +1,7 @@
 ﻿using Blog.Areas.Manage.Models;
 using Blog.Models;
 using Blog.Services;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
@@ -52,6 +53,7 @@ namespace Blog.Areas.Manage.Controllers
             }
         }
 
+        #region Index
         [HttpGet]
         public async Task<IActionResult> Index()
         {
@@ -133,7 +135,9 @@ namespace Blog.Areas.Manage.Controllers
             model.StatusMessage = "Hồ sơ đã cập nhật";
             return RedirectToAction("Index", "Manage");
         }
+        #endregion
 
+        #region Change Password
         [HttpGet]
         public async Task<IActionResult> ChangePassword()
         {
@@ -179,7 +183,9 @@ namespace Blog.Areas.Manage.Controllers
             model.StatusMessage = "Mật khẩu đã thay đổi.";
             return RedirectToAction(nameof(ChangePassword));
         }
+        #endregion
 
+        #region Set Password
         [HttpGet]
         public async Task<IActionResult> SetPassword()
         {
@@ -227,7 +233,9 @@ namespace Blog.Areas.Manage.Controllers
 
             return RedirectToAction(nameof(SetPassword));
         }
+        #endregion
 
+        #region Change Email
         [HttpGet]
         public async Task<IActionResult> Email()
         {
@@ -313,7 +321,9 @@ namespace Blog.Areas.Manage.Controllers
             model.StatusMessage = "Email xác minh đã được gửi. Vui lòng kiểm tra Email của bạn.";
             return RedirectToAction("Email");
         }
+        #endregion
 
+        #region 2FA
         [HttpGet]
         public async Task<IActionResult> TwoFactorAuthentication()
         {
@@ -535,7 +545,9 @@ namespace Blog.Areas.Manage.Controllers
             model.SharedKey = FormatKey(unformattedKey);
             model.AuthenticatorUri = GenerateQrCodeUri(user.Email, unformattedKey);
         }
+        #endregion
 
+        #region Phone
         public IActionResult AddPhoneNumber()
         {
             return View();
@@ -633,5 +645,89 @@ namespace Blog.Areas.Manage.Controllers
             }
             return RedirectToAction(nameof(Index));
         }
+        #endregion
+
+        #region External Login
+        [HttpGet]
+        public async Task<IActionResult> ExternalLogin()
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                return NotFound($"Không thể tải người dùng có ID '{_userManager.GetUserId(User)}'.");
+            }
+            var model = new ExternalLoginViewModel
+            {
+                CurrentLogins = await _userManager.GetLoginsAsync(user)
+            };
+            model.OtherLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync())
+                .Where(auth => model.CurrentLogins.All(ul => auth.Name != ul.LoginProvider))
+                .ToList();
+            if(user.PasswordHash != null || model.CurrentLogins.Count > 1)
+            model.ShowRemoveButton = true;
+
+            return View(model);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> RemoveLogin(ExternalLoginViewModel model, string loginProvider, string providerKey)
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                return NotFound($"Không thể tải người dùng có ID '{_userManager.GetUserId(User)}'.");
+            }
+
+            var result = await _userManager.RemoveLoginAsync(user, loginProvider, providerKey);
+            if (!result.Succeeded)
+            {
+                var userId = await _userManager.GetUserIdAsync(user);
+                throw new InvalidOperationException($"Đã xảy ra lỗi không mong muốn khi xóa thông tin đăng nhập bên ngoài cho người dùng có ID '{userId}'.");
+            }
+
+            await _signInManager.RefreshSignInAsync(user);
+            model.StatusMessage = "Thông tin đăng nhập bên ngoài đã bị xóa.";
+
+            return RedirectToAction("ExternalLogin","Manage");
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> LinkLogin(string provider)
+        {
+            // Xóa cookie bên ngoài hiện có để đảm bảo quy trình đăng nhập sạch sẽ
+            await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
+
+            string redirectUrl = Url.Action(nameof(LinkLoginCallback));
+            var properties = _signInManager.ConfigureExternalAuthenticationProperties(provider, redirectUrl, _userManager.GetUserId(User));
+
+            return Challenge(properties, provider);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> LinkLoginCallback(ExternalLoginViewModel model)
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                return NotFound($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
+            }
+
+            var info = await _signInManager.GetExternalLoginInfoAsync(await _userManager.GetUserIdAsync(user));
+            if (info == null)
+            {
+                throw new InvalidOperationException($"Unexpected error occurred loading external login info for user with ID '{user.Id}'.");
+            }
+
+            var result = await _userManager.AddLoginAsync(user, info);
+            if (!result.Succeeded)
+            {
+                throw new InvalidOperationException($"Unexpected error occurred adding external login for user with ID '{user.Id}'.");
+            }
+            await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
+
+            model.StatusMessage = "The external login was added.";
+            return RedirectToAction("ExternalLogin", "Manage");
+        }
+        #endregion
     }
 }

@@ -1,11 +1,12 @@
 ﻿@model List<Blog.Models.CartItem>
 
-<h2>Giỏ hàng</h2>
+<h2>GIỎ HÀNG</h2>
 
 @if (Model.Count > 0)
 {
     decimal total = 0;
     int stt = 1;
+
     <table class="table">
         <tr>
             <th>#</th>
@@ -15,7 +16,6 @@
             <th>Thành tiền</th>
             <th></th>
         </tr>
-
         @foreach (var cartitem in Model)
         {
             var thanhtien = cartitem.quantity * cartitem.product.Price;
@@ -25,15 +25,11 @@
                 <td>@(stt++)</td>
                 <td>@cartitem.product.Name</td>
                 <td>@(cartitem.product.Price.ToString("n0"))</td>
-                <td>
-                    <input asp-for="@cartitem.quantity"
-                           id="@($"quantity-{cartitem.product.ProductId}")" />
-                </td>
+                <td><input type="number" class="@($"quantity_{cartitem.product.ProductId}")" value="@cartitem.quantity"/></td>
                 <td>@(thanhtien.ToString("n0"))</td>
                 <td>
-                    <button class="btn btn-success updatecartitem"
-                            data-productid="@cartitem.product.ProductId">
-                        Cập nhật
+                    <button class="btn btn-success updatecartitem" data-productid="@cartitem.product.ProductId">
+                       Cập nhật
                     </button>
                     <a asp-route="removecart" asp-route-productid="@cartitem.product.ProductId"
                        class="btn btn-danger">Xóa</a>
@@ -46,33 +42,35 @@
             <td></td>
         </tr>
     </table>
-
-    <a asp-controller="Product" asp-action="Checkout" class="btn btn-success">Gửi đơn hàng</a>
-
-    @section Scripts{
-        <script>
-            $(document).ready(function () {
-                $(".updatecartitem").click(function (event) {
-                    event.preventDefault();
-                    var productid = $(this).attr("data-productid");
-                    var quantity = $("#quantity-" + productid).val();
-                    $.ajax({
-                        type: "POST"
-                        url: "@Url.RouteUrl("updatecart")",
-                        data: {
-                            productid: productid,
-                            quantity: quantity
-                        },
-                        success: function (result) {
-                            window.location.href = @Url.RouteUrl("cart");
-                        }
-                    });
-                });
-            });
-        </script>
-    }
+    
+    <a asp-route="checkout" class="btn btn-success">Gửi đơn hàng</a>
+    
 }
 else
 {
     <p class="alert alert-danger">Giỏ hàng trống</p>
+}
+
+@section Scripts {
+    <script>
+    $(document).ready(function () {
+        $(".updatecartitem").click(function (event) {
+            event.preventDefault();
+            var productid = $(this).attr("data-productid");
+            var quantity = $(".quantity_" + productid).val();
+            console.log(quantity);
+            $.ajax({
+                type: "POST",
+                url:"@Url.RouteUrl("updatecart")",
+                data: {
+                    productid: productid,
+                    quantity: quantity
+                },
+                success: function (result) {
+                    window.location.href = "@Url.RouteUrl("cart")";
+                }
+            });
+        });
+    });
+    </script>
 }

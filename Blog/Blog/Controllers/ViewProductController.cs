@@ -1,6 +1,7 @@
 ﻿using Blog.Data;
 using Blog.Models;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
@@ -17,11 +18,15 @@ namespace Blog.Controllers
         private readonly ILogger<ViewProductController> _logger;
 
         private readonly BlogDbContext _context;
-
-        public ViewProductController(ILogger<ViewProductController> logger, BlogDbContext context)
+        private readonly UserManager<User> _userManager;
+        private readonly SignInManager<User> _signInManager;
+        public ViewProductController(ILogger<ViewProductController> logger, BlogDbContext context,
+            UserManager<User> userManager, SignInManager<User> signInManager)
         {
             _context = context;
             _logger = logger;
+            _userManager = userManager;
+            _signInManager = signInManager;
         }
 
         // Hiện thị danh sách sản phẩm, có nút chọn đưa vào giỏ hàng
@@ -54,7 +59,7 @@ namespace Blog.Controllers
 
             // Lưu cart vào session
             SaveCartSession(cart);
-            // Chuyển đến trang hiện thị Cart
+         
             return RedirectToAction(nameof(Index));
         }
 
@@ -76,13 +81,13 @@ namespace Blog.Controllers
         // Cập nhật
         [Route("/updatecart", Name = "updatecart")]
         [HttpPost]
-        public IActionResult UpdateCart([FromRoute]int productid, [FromForm]int quantily)
+        public IActionResult UpdateCart([FromForm]int productid, [FromForm]int quantity)
         {
             //Cập nhật Cart thay đổi số lượng quantity...
             var cart = GetCartItems();
             var cartitem = cart.Find(p => p.product.ProductId == productid);
             if (cartitem != null)
-                cartitem.quantity = quantily;
+                cartitem.quantity = quantity;
             SaveCartSession(cart);
             // Trả về mã thành công (không có nội dung gì - chỉ để Ajax gọi)
             return Ok();
@@ -95,10 +100,51 @@ namespace Blog.Controllers
             return View(GetCartItems());
         }
 
-        [Route("/checkout")]
-        public IActionResult Checkout()
+        [Route("/checkout", Name = "checkout")]
+        public async Task<IActionResult> Checkout(Order order)
         {
-            //Xử lý khi đặt hàng
+            if(!_signInManager.IsSignedIn(User))
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
+            var cart = GetCartItems();
+            if (cart.Count == 0)
+            {
+                ModelState.AddModelError("", "Giỏ hàng của bạn trống, hãy thêm một số mặt hàng trước");
+                return RedirectToAction(nameof(Index));
+            }
+
+            var userId = _userManager.GetUserId(User);
+            var user = await _userManager.FindByIdAsync(userId);
+
+            order.OrderTotal = cart.Sum(item => item.quantity * item.product.Price);
+            order.OrderPlaced = DateTime.Now;
+            order.UserId = Convert.ToInt32(userId);
+            _context.Orders.Add(order);
+            await _context.SaveChangesAsync();
+
+            foreach (var item in cart)
+            {
+                var orderDetail = new OrderDetail()
+                {
+                    Quantity = item.quantity,
+                    ProductId = item.product.ProductId,
+                    OrderId = order.Id,
+                    Price = item.product.Price
+                };
+                _context.OrderDetails.Add(orderDetail);
+            }
+            await _context.SaveChangesAsync();
+            ClearCart();
+
+            return RedirectToAction("CheckoutComplete");
+        }
+
+        [Route("/checkoutcomplete")]
+        public IActionResult CheckoutComplete()
+        {
+            ViewBag.CheckoutCompleteMessage = "Cảm ơn đơn đặt hàng của bạn.";
             return View();
         }
 

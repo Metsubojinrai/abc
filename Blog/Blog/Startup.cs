@@ -112,8 +112,11 @@ namespace Blog
             services.AddAuthentication()
                 .AddFacebook(facebookOptions =>
                 {
-                    facebookOptions.AppId = "placeholder";
-                    facebookOptions.AppSecret = "placeholder";
+                    // Đọc thông tin Authentication:Facebook từ appsettings.json
+                    IConfigurationSection facebookAuthNSection = Configuration.GetSection("Authentication:Facebook");
+
+                    facebookOptions.AppId = facebookAuthNSection["AppId"];
+                    facebookOptions.AppSecret = facebookAuthNSection["AppSecret"];
                 })
                 .AddGoogle(googleOptions =>
                 {

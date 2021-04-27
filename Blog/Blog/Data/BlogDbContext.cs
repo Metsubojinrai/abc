@@ -33,5 +33,7 @@ namespace Blog.Data
         public DbSet<Category> Categories { set; get; }
         public DbSet<Product> Products { set; get; }
         public DbSet<ProductCategory> ProductCategories { set; get; }
+        public DbSet<Order> Orders { get; set; }
+        public DbSet<OrderDetail> OrderDetails { get; set; }
     }
 }

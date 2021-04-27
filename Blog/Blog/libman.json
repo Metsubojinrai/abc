@@ -21,6 +21,10 @@
     {
       "library": "jquery-easing@1.4.1",
       "destination": "wwwwroot/lib/jquery-easing"
+    },
+    {
+      "library": "jquery-ajax-unobtrusive@3.2.6",
+      "destination": "wwwroot/lib/jquery-ajax-unobtrusive/"
     }
   ]
 }

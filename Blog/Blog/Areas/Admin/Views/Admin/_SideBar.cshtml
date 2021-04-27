@@ -2,6 +2,10 @@
 @using Blog.Models
 @inject SignInManager<User> SignInManager
 
+@{
+    var hasExternalLogins = (await SignInManager.GetExternalAuthenticationSchemesAsync()).Any();
+}
+
 <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
 
     <!-- Sidebar - Brand -->
@@ -33,6 +37,11 @@
                 <a class="collapse-item" asp-area="Manage" asp-controller="Manage" asp-action="Index">Profile</a>
                 <a class="collapse-item" asp-area="Manage" asp-controller="Manage" asp-action="Email">Email</a>
                 <a class="collapse-item" asp-area="Manage" asp-controller="Manage" asp-action="ChangePassword">Password</a>
+                @if (hasExternalLogins)
+                {
+                    <a class="collapse-item" asp-area="Manage" asp-controller="Manage" asp-action="ExternalLogin">External Login</a>
+                }
+                <a class="collapse-item" asp-area="Manage" asp-controller="Manage" asp-action="TwoFactorAuthentication">Two-factor authentication</a>
             </div>
         </div>
     </li>
