@@ -3,6 +3,8 @@ using Blog.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using System;
@@ -20,20 +22,55 @@ namespace Blog.Controllers
         private readonly BlogDbContext _context;
         private readonly UserManager<User> _userManager;
         private readonly SignInManager<User> _signInManager;
+        private readonly IMemoryCache _cache;
+        public const int ITEMS_PER_PAGE = 6;
         public ViewProductController(ILogger<ViewProductController> logger, BlogDbContext context,
-            UserManager<User> userManager, SignInManager<User> signInManager)
+            UserManager<User> userManager, SignInManager<User> signInManager, IMemoryCache cache)
         {
             _context = context;
             _logger = logger;
             _userManager = userManager;
             _signInManager = signInManager;
+            _cache = cache;
         }
 
         // Hiện thị danh sách sản phẩm, có nút chọn đưa vào giỏ hàng
-        public IActionResult Index()
+        [Route("{product?}", Name ="listproduct")]
+        public async Task<IActionResult> Index([Bind(Prefix = "page")] int page, 
+                [FromRoute(Name = "product")] string productCategory)
         {
-            var products = _context.Products.ToList();
-            return View(products);
+            var categories = GetCategories();
+
+            ViewData["categories"] = categories;
+            ViewData["productCategory"] = productCategory;
+
+            if (page == 0)
+                page = 1;
+            var listproduct = _context.Products
+                .Include(p => p.ProductCategories)
+                .ThenInclude(c => c.Category)
+                .OrderByDescending(p => p.DateCreated)
+                .AsQueryable();
+            
+            // Lấy tổng số dòng dữ liệu
+            var totalItems = listproduct.Count();
+            // Tính số trang hiện thị (mỗi trang hiện thị ITEMS_PER_PAGE mục)
+            int totalPages = (int)Math.Ceiling((double)totalItems / ITEMS_PER_PAGE);
+
+            if (page > totalPages)
+                return RedirectToAction(nameof(ViewProductController.Index), new { page = totalPages });
+
+
+            var products = await listproduct
+                            .Skip(ITEMS_PER_PAGE * (page - 1))       // Bỏ qua các trang trước
+                            .Take(ITEMS_PER_PAGE)                          // Lấy số phần tử của trang hiện tại
+                            .ToListAsync();
+
+            // return View (await listPosts.ToListAsync());
+            ViewData["pageNumber"] = page;
+            ViewData["totalPages"] = totalPages;
+
+            return View(products.AsEnumerable());
         }
 
         // Thêm sản phẩm vào cart
@@ -173,6 +210,28 @@ namespace Blog.Controllers
             var session = HttpContext.Session;
             string jsoncart = JsonConvert.SerializeObject(ls);
             session.SetString(CARTKEY, jsoncart);
+        }
+
+        [NonAction]
+        List<Category> GetCategories()
+        {
+            string keycacheCategories = "_listallcategories";
+
+            // Phục hồi categories từ Memory cache, không có thì truy vấn Db
+            if (!_cache.TryGetValue(keycacheCategories, out List<Category> categories))
+            {
+
+                categories = _context.Categories
+                    .AsEnumerable()
+                    .ToList();
+
+                // Thiết lập cache - lưu vào cache
+                var cacheEntryOptions = new MemoryCacheEntryOptions()
+                    .SetSlidingExpiration(TimeSpan.FromMinutes(300));
+                _cache.Set("_GetCategories", categories, cacheEntryOptions);
+            }
+
+            return categories;
         }
     }
 }

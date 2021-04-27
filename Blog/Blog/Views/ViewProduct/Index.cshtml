@@ -5,7 +5,7 @@
 }
 
 <div class="card-columns">
-    @foreach(var product in Model)
+    @foreach (var product in Model)
     {
         <div class="card">
             <h4 class="card-header">@product.Name</h4>
@@ -15,9 +15,37 @@
             </div>
             <div class="card-footer">
                 <span class="text-muted">@product.Price.ToString("n0") VND</span>
-                <a asp-route="addcart" asp-route-productid ="@product.ProductId"
-                   class="btn btn-secondary btn-sm float-right">Đặt hàng</a> 
-            </div> 
+                <a asp-route="addcart" asp-route-productid="@product.ProductId"
+                   class="btn btn-secondary btn-sm float-right">Đặt hàng</a>
+            </div>
         </div>
     }
 </div>
+
+@section Sidebar {
+    @{
+        @await Component.InvokeAsync(CategorySidebar.COMPONENTNAME,
+            new CategorySidebar.CategorySidebarData()
+            {
+                categories = ViewBag.categories,
+                productCategory = ViewBag.productCategory
+            })
+    }
+}
+
+@{
+
+    Func<int?, string> generateUrl = (int? _pagenumber) =>
+    {
+        return Url.Link("listproduct", new { page = _pagenumber });
+    };
+
+    var datapaging = new
+    {
+        currentPage = ViewBag.pageNumber,
+        countPages = ViewBag.totalPages,
+        generateUrl = generateUrl
+    };
+
+}
+<partial name="_Paging" model="@datapaging" />

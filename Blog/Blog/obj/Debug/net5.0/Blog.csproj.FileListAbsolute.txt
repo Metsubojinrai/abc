@@ -1531,7 +1531,6 @@ D:\MetsubouJinrai\Blog\Blog\obj\Debug\net5.0\Razor\Views\Product\Details.cshtml.
 D:\MetsubouJinrai\Blog\Blog\obj\Debug\net5.0\Razor\Views\Product\Edit.cshtml.g.cs
 D:\MetsubouJinrai\Blog\Blog\obj\Debug\net5.0\Razor\Views\Product\Index.cshtml.g.cs
 D:\MetsubouJinrai\Blog\Blog\obj\Debug\net5.0\Razor\Views\Product\_Layout.cshtml.g.cs
-D:\MetsubouJinrai\Blog\Blog\obj\Debug\net5.0\Razor\Views\Product\_Paging.cshtml.g.cs
 D:\MetsubouJinrai\Blog\Blog\obj\Debug\net5.0\Razor\Views\Product\_SideBar.cshtml.g.cs
 D:\MetsubouJinrai\Blog\Blog\obj\Debug\net5.0\Razor\Views\Shared\Error.cshtml.g.cs
 D:\MetsubouJinrai\Blog\Blog\obj\Debug\net5.0\Razor\Views\Shared\_CartPartial.cshtml.g.cs
@@ -1562,3 +1561,5 @@ D:\MetsubouJinrai\Blog\Blog\bin\Debug\net5.0\Microsoft.AspNetCore.Authentication
 D:\MetsubouJinrai\Blog\Blog\obj\Debug\net5.0\Razor\Areas\Account\Views\Account\ExternalLoginConfirmation.cshtml.g.cs
 D:\MetsubouJinrai\Blog\Blog\obj\Debug\net5.0\Razor\Areas\Manage\Views\Manage\ExternalLogin.cshtml.g.cs
 D:\MetsubouJinrai\Blog\Blog\obj\Debug\net5.0\Razor\Views\ViewProduct\CheckoutComplete.cshtml.g.cs
+D:\MetsubouJinrai\Blog\Blog\obj\Debug\net5.0\Razor\Views\ViewProduct\_Paging.cshtml.g.cs
+D:\MetsubouJinrai\Blog\Blog\obj\Debug\net5.0\Razor\Views\Shared\Components\CategorySidebar\Default.cshtml.g.cs

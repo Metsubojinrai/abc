@@ -10,6 +10,7 @@ using Blog.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using System.IO;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace Blog.Areas_Admin_Controllers
 {
