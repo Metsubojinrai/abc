@@ -1,0 +1,59 @@
+﻿@model Blog.Models.Order
+
+@{
+    ViewData["Title"] = "Details";
+    Layout = "_Layout";
+    int stt = 1;
+    
+}
+
+<h1>Chi tiết</h1>
+
+<div>
+    <h4>Đơn hàng @Model.Id</h4>
+    <hr />
+    <dl class="row">
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.OrderTotal)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.OrderTotal)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.OrderPlaced)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.OrderPlaced)
+        </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.User)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.User.UserName)
+        </dd>
+    </dl>
+</div>
+<table class="table">
+    <tr>
+        <th>#</th>
+        <th>Sản phẩm</th>
+        <th>Giá</th>
+        <th>Số lượng</th>
+        <th>Thành tiền</th>
+        <th></th>
+    </tr>
+
+    @foreach (var item in Model.OrderLines)
+    {
+        <tr>
+            <td>@(stt++)</td>
+            <td>@item.Product.Name</td>
+            <td>@item.Price</td>
+            <td>@item.Quantity</td>
+            <td>@(item.Price * item.Quantity)</td>
+        </tr>
+    }
+</table>
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>

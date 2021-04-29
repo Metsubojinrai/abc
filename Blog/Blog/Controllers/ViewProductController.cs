@@ -3,6 +3,7 @@ using Blog.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
@@ -35,23 +36,57 @@ namespace Blog.Controllers
         }
 
         // Hiện thị danh sách sản phẩm, có nút chọn đưa vào giỏ hàng
-        [Route("{product?}", Name ="listproduct")]
-        public async Task<IActionResult> Index([Bind(Prefix = "page")] int page, 
-                [FromRoute(Name = "product")] string productCategory)
+        [Route("{category?}", Name = "listproduct")]
+        public async Task<IActionResult> Index([FromQuery] int page,
+                [FromRoute(Name = "category")] string category,string sortOrder)
         {
+            List<string> listsort = new() { "name desc","date","date desc"};
+            ViewData["SortOrders"] = new SelectList(listsort);
+            ViewBag.NameSortParm = String.IsNullOrEmpty(sortOrder) ? "name desc" : "";
             var categories = GetCategories();
-
+            Category cate = null;
+            if (category != null)
+            {
+                cate = FindCategoryBySlug(categories, category);
+            }
+            
             ViewData["categories"] = categories;
-            ViewData["productCategory"] = productCategory;
+            ViewData["productCategory"] = category;
+            ViewData["CurrentCategory"] = cate;
 
             if (page == 0)
                 page = 1;
-            var listproduct = _context.Products
-                .Include(p => p.ProductCategories)
-                .ThenInclude(c => c.Category)
-                .OrderByDescending(p => p.DateCreated)
-                .AsQueryable();
-            
+
+            // ........................................
+            // Truy vấn lấy các product
+            var listproduct = _context.Products.AsQueryable();
+
+            if (cate != null)
+            {
+                var ids = new List<int>
+                {
+                    cate.Id
+                };
+                listproduct = listproduct
+                    .Where(p => p.ProductCategories.Where(c => ids.Contains(c.CategoryID)).Any());
+            }
+
+            switch (sortOrder)
+            {
+                case "name desc":
+                    listproduct = listproduct.OrderByDescending(s => s.Name);
+                    break;
+                case "date desc":
+                    listproduct = listproduct.OrderByDescending(s => s.DateCreated);
+                    break;
+                case "date":
+                    listproduct = listproduct.OrderBy(s => s.DateCreated);
+                    break;
+                default:
+                    listproduct = listproduct.OrderBy(s => s.Name);
+                    break;
+            }
+
             // Lấy tổng số dòng dữ liệu
             var totalItems = listproduct.Count();
             // Tính số trang hiện thị (mỗi trang hiện thị ITEMS_PER_PAGE mục)
@@ -60,13 +95,11 @@ namespace Blog.Controllers
             if (page > totalPages)
                 return RedirectToAction(nameof(ViewProductController.Index), new { page = totalPages });
 
-
             var products = await listproduct
                             .Skip(ITEMS_PER_PAGE * (page - 1))       // Bỏ qua các trang trước
-                            .Take(ITEMS_PER_PAGE)                          // Lấy số phần tử của trang hiện tại
+                            .Take(ITEMS_PER_PAGE)                    // Lấy số phần tử của trang hiện tại
                             .ToListAsync();
 
-            // return View (await listPosts.ToListAsync());
             ViewData["pageNumber"] = page;
             ViewData["totalPages"] = totalPages;
 
@@ -232,6 +265,18 @@ namespace Blog.Controllers
             }
 
             return categories;
+        }
+
+        [NonAction]
+        Category FindCategoryBySlug(List<Category> categories, string category)
+        {
+
+            foreach (var c in categories)
+            {
+                if (c.Name.ToLower() == category) return c;
+            }
+
+            return null;
         }
     }
 }

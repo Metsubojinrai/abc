@@ -81,20 +81,19 @@ body {
 }
 
 .sidenav {
-    height: 100%;
-    width: 160px;
+    width: 200px;
     position: fixed;
     z-index: 1;
-    top: 0;
-    left: 0;
-    background-color: #111;
+    top: 60px;
+    left: 10px;
+    background: #eee;
     overflow-x: hidden;
-    padding-top: 20px;
+    padding: 8px 0;
 }
 .sidenav a {
     padding: 6px 8px 6px 16px;
     text-decoration: none;
-    font-size: 25px;
+    font-size: 16px;
     color: #818181;
     display: block;
 }    
@@ -104,7 +103,8 @@ body {
 }
 
 .main {
-    margin-left: 180px; /* Same as the width of the sidenav */
-    font-size: 28px; /* Increased text to enable scrolling */
+    margin-left: 210px; /* Same width as the sidebar + left position in px */
+    margin-right: 210px;
+    font-size: 20px; /* Increased text to enable scrolling */
     padding: 0px 10px;
 }

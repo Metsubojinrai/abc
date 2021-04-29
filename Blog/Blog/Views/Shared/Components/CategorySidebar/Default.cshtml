@@ -7,13 +7,13 @@
 {
     @Html.Raw("<div class=\"sidenav\">")
         <a asp-controller="ViewProduct" asp-action="Index"
-           asp-route-products="">Các loại sản phẩm</a>
+           asp-route-category="">Các loại sản phẩm</a>
     <ul>
         @foreach (var item in categories)
         {
             var cssClass = (item.Name == Model.productCategory) ? "active" : null;
             <li>
-                <a asp-controller="ViewProduct" asp-action="Index" asp-route-products="@item.Name"
+                <a asp-controller="ViewProduct" asp-action="Index" asp-route-category="@item.Name"
                    class="@cssClass">@item.Name</a>
             </li>
         }

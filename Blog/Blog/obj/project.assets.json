@@ -8784,11 +8784,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "D:\\MetsubouJinrai\\Blog\\Blog\\Blog.csproj",
+      "projectUniqueName": "D:\\Blog\\Blog\\Blog.csproj",
       "projectName": "Blog",
-      "projectPath": "D:\\MetsubouJinrai\\Blog\\Blog\\Blog.csproj",
+      "projectPath": "D:\\Blog\\Blog\\Blog.csproj",
       "packagesPath": "C:\\Users\\PC\\.nuget\\packages\\",
-      "outputPath": "D:\\MetsubouJinrai\\Blog\\Blog\\obj\\",
+      "outputPath": "D:\\Blog\\Blog\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"

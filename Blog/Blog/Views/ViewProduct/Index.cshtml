@@ -1,9 +1,21 @@
 ﻿@model List<Blog.Models.Product>
 @{
     ViewData["Title"] = "Các sản phẩm";
-    Layout = "/Views/Shared/_Layout.cshtml";
+    Layout = "/Views/ViewProduct/_Layout.cshtml";
+    Category cate = ViewBag.CurrentCategory;
 }
 
+@if (cate != null)
+{
+    <h2>@cate.Name</h2>
+}
+<form asp-route="products">
+    Find by name: @Html.TextBox("searchString")
+    <input type="submit" value="Search" />
+    Sort By: @Html.DropDownList("sortOrder",ViewBag.SortOrders,"--Select Sort--" ,new { @class = "w-20", id = "selectedSort" })
+    <input type="submit" value="Sort" />
+</form>
+<hr />
 <div class="card-columns">
     @foreach (var product in Model)
     {
@@ -37,7 +49,8 @@
 
     Func<int?, string> generateUrl = (int? _pagenumber) =>
     {
-        return Url.Link("listproduct", new { page = _pagenumber });
+        if (_pagenumber == 1) _pagenumber = null;
+        return Url.Link("listproduct", new { page = _pagenumber, category = ViewBag.productCategory });
     };
 
     var datapaging = new
